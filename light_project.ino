@@ -23,6 +23,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 bool pattern[20][16];
 bool bErasing = false;
+bool bBlankScreen = true;
 TS_Point p;
 
 
@@ -68,6 +69,7 @@ void loop()
     // Serial.println(p.z); 
   if(p.y < 20)
    {
+    bBlankScreen = false;
     while(ts.touched())
     {
       if(p.y < 20)
@@ -105,7 +107,6 @@ void draw_sidebar()
 
 void check_sidebar()
 {
- Serial.println(p.y);
   if(p.y >= 19)
  {
     while(finishedButtonPressed() && ts.touched())
@@ -176,11 +177,19 @@ bool resetButtonPressed()
 
 void resetScreen()
 {
+  if (!bBlankScreen)
+  {
+   bBlankScreen = true;
   for(int i = 0; i < LED_WIDTH; i++)
+  {
+    tft.fillRect(BOXSIZE*i, 0, BOXSIZE, BOXSIZE * 16, ILI9341_CYAN);
     for(int n = 0; n < LED_HEIGHT; n++)
       {
         pattern[i][n] = false;
-         tft.fillRect(BOXSIZE*i, BOXSIZE*n, BOXSIZE, BOXSIZE, ILI9341_BLACK);
+        update_ts();
       }
- // tft.fillScreen(ILI9341_BLACK);
+    tft.fillRect(BOXSIZE*(i), 0, BOXSIZE, BOXSIZE * 16, ILI9341_BLACK);  
+  }
+  }
+
 }
