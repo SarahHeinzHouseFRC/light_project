@@ -41,15 +41,11 @@ void setup(void)
   tft.setTextColor(ILI9341_ORANGE);
   tft.setTextSize(8);
   tft.print("S");
-  tft.setTextSize(5);
   tft.print("H");
   tft.setTextColor(ILI9341_BLUE);
-  tft.setTextSize(4);
   tft.print("A");
   tft.setTextColor(ILI9341_GREEN);
-  tft.setTextSize(5);
   tft.print("R");
-  tft.setTextSize(8);
   tft.print("P");
   //delay(100);
   tft.fillScreen(ILI9341_BLACK);
@@ -59,48 +55,21 @@ void setup(void)
 
 void loop()
 {
-  if (ts.bufferEmpty()) {
+  if(ts.bufferEmpty())
     return;
-  }
- 
+    
+    
+ //if(p.z <
     update_ts();
-      Serial.println(p.z); 
+     Serial.println(p.z); 
+  if(p.y < 20)
+   {
+    pattern[p.x][p.y] = true;
+    tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_WHITE);
 
-   
-      
+   }
 
-
-   pattern[p.x][p.y] = true;//!pattern[p.x / BOXSIZE][p.y / BOXSIZE];
-   
-        
-//      for(int i = 0; i < LED_WIDTH; i++)
-// {
-//  for(int n = 0; n < LED_HEIGHT; n++)
-//   {
-//    int color;
-//    if(pattern[i][n])
-//      color = ILI9341_WHITE;
-//     else 
-//     color = ILI9341_BLACK;
-     
-  tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_WHITE);
-
-  
-  //TS_Point last;
-  //last.x = p.x;
-  //last.y = p.y;
-  //}
- 
-      
-      
-      
-  update_sidebar();
-
-    
-    
-    
-    
-    
+  check_sidebar();
  
 }
 
@@ -112,26 +81,23 @@ void draw_sidebar()
     tft.fillRect(BOXSIZE*20, BOXSIZE*5, BOXSIZE*2, BOXSIZE*6, ILI9341_WHITE);
     
     tft.fillRect(BOXSIZE*20, BOXSIZE*11, BOXSIZE*2, BOXSIZE*5, ILI9341_RED);
-  
-  
-  
 }
 
-void update_sidebar()
+void check_sidebar()
 {
  Serial.println(p.y);
   if(p.y >= 19)
  {
-    while(p.x <= 4 && p.y >= 19 && ts.touched())
+    while(finishedButtonPressed && ts.touched())
     {
-     update_ts();
-       tft.fillRect(BOXSIZE*21, BOXSIZE*0, BOXSIZE, BOXSIZE*5, ILI9341_PINK);
+      update_ts();
+      tft.fillRect(BOXSIZE*21, BOXSIZE*0, BOXSIZE, BOXSIZE*5, ILI9341_PINK);
        
        //to send to lights
        
     }
     draw_sidebar();
-    while( 4 < p.x && p.x < 11 && p.y >= 19 && ts.touched())
+    while(toggleButtonPressed && ts.touched())
     {
            update_ts();
        tft.fillRect(BOXSIZE*21, BOXSIZE*5, BOXSIZE, BOXSIZE*6, ILI9341_PINK);
@@ -139,17 +105,25 @@ void update_sidebar()
        
     }
     draw_sidebar();
-    while(p.x >= 11 && p.y >= 19 && ts.touched())
+    while(resetButtonPressed && ts.touched())
     {
-           update_ts();
+       update_ts();
        tft.fillRect(BOXSIZE*21, BOXSIZE*11, BOXSIZE, BOXSIZE*5, ILI9341_PINK);
        
        //to erase screen
-       
     }
     if(ts.touched()) 
     {
-    //clear whatever command because they moved off the button
+       Serial.println("no button pressed");
+    }
+    else
+    {
+//     if (finishedButtonPressed)
+//       Serial.println("finished button pressed");
+//     else if (toggleButtonPressed) 
+//       Serial.println("toggle button pressed");
+//     else if (resetButtonPressed)
+//       Serial.println("rest button pressed");
     }
     
      draw_sidebar();
@@ -167,3 +141,9 @@ void update_ts()
   }
 }
 
+bool finishedButtonPressed()
+  return (p.x <= 4 && p.y >= 19);
+bool toggleButtonPressed()
+  return (4 < p.x && p.x < 11 && p.y >= 19);
+bool resetButtonPressed()
+  return (p.x >= 11 && p.y >= 19);
