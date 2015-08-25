@@ -1,0 +1,2 @@
+Serial to send array
+Make it so muti presses will not reset screen mult times

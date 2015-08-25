@@ -171,6 +171,9 @@ void resetScreen()
 {
   for(int i = 0; i < LED_WIDTH; i++)
     for(int n = 0; n < LED_HEIGHT; n++)
-      pattern[i][n] = false;
-  tft.fillScreen(ILI9341_BLACK);
+      {
+        pattern[i][n] = false;
+         tft.fillRect(BOXSIZE*i, BOXSIZE*n, BOXSIZE, BOXSIZE, ILI9341_BLACK);
+      }
+ // tft.fillScreen(ILI9341_BLACK);
 }
