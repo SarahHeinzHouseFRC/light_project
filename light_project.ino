@@ -68,8 +68,11 @@ void loop()
     // Serial.println(p.z); 
   if(p.y < 20)
    {
-     
-    if(bErasing)
+    while(ts.touched())
+    {
+      if(p.y < 20)
+      {
+      if(bErasing)
      {
       pattern[p.x][p.y] = false;
       tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_BLACK);
@@ -80,9 +83,13 @@ void loop()
       pattern[p.x][p.y] = true;
       tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_WHITE);
     }
+   
+      }
+  update_ts();  
+ }
    }
-
-  check_sidebar();
+  else
+    check_sidebar();
  
 }
 
