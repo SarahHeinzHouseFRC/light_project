@@ -22,7 +22,11 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 #define LED_HEIGHT 16
 
 bool pattern[20][16];
+bool bErasing = false;
 TS_Point p;
+
+
+// set z pressure to x < 50
 
 
 void setup(void)
@@ -61,12 +65,21 @@ void loop()
     
  //if(p.z <
     update_ts();
-     Serial.println(p.z); 
+    // Serial.println(p.z); 
   if(p.y < 20)
    {
-    pattern[p.x][p.y] = true;
-    tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_WHITE);
-
+     
+    if(bErasing)
+     {
+      pattern[p.x][p.y] = false;
+      tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_BLACK);
+    }
+    
+    else
+    {
+      pattern[p.x][p.y] = true;
+      tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_WHITE);
+    }
    }
 
   check_sidebar();
@@ -88,7 +101,7 @@ void check_sidebar()
  Serial.println(p.y);
   if(p.y >= 19)
  {
-    while(finishedButtonPressed && ts.touched())
+    while(finishedButtonPressed() && ts.touched())
     {
       update_ts();
       tft.fillRect(BOXSIZE*21, BOXSIZE*0, BOXSIZE, BOXSIZE*5, ILI9341_PINK);
@@ -97,7 +110,7 @@ void check_sidebar()
        
     }
     draw_sidebar();
-    while(toggleButtonPressed && ts.touched())
+    while(toggleButtonPressed() && ts.touched())
     {
            update_ts();
        tft.fillRect(BOXSIZE*21, BOXSIZE*5, BOXSIZE, BOXSIZE*6, ILI9341_PINK);
@@ -105,7 +118,7 @@ void check_sidebar()
        
     }
     draw_sidebar();
-    while(resetButtonPressed && ts.touched())
+    while(resetButtonPressed() && ts.touched())
     {
        update_ts();
        tft.fillRect(BOXSIZE*21, BOXSIZE*11, BOXSIZE, BOXSIZE*5, ILI9341_PINK);
@@ -118,12 +131,12 @@ void check_sidebar()
     }
     else
     {
-//     if (finishedButtonPressed)
-//       Serial.println("finished button pressed");
-//     else if (toggleButtonPressed) 
-//       Serial.println("toggle button pressed");
-//     else if (resetButtonPressed)
-//       Serial.println("rest button pressed");
+     if (finishedButtonPressed())
+       Serial.println("finished button pressed");
+     else if (toggleButtonPressed()) 
+       bErasing = !bErasing;
+     else if (resetButtonPressed())
+       resetScreen();
     }
     
      draw_sidebar();
@@ -136,14 +149,28 @@ void update_ts()
 {
   if (!ts.bufferEmpty()) {
     p = ts.getPoint();
-    p.x = map(p.x, TS_MAXX, TS_MINX, 0, 16);// tft.width());
-    p.y = map(p.y, TS_MINY, TS_MAXY, 0, 21);// tft.height());
+    p.x = map(p.x, TS_MAXX, TS_MINX, 0, 16);
+    p.y = map(p.y, TS_MINY, TS_MAXY, 0, 21);
   }
 }
 
 bool finishedButtonPressed()
-  return (p.x <= 4 && p.y >= 19);
+{
+  return(p.x <= 4 && p.y >= 19);
+}
 bool toggleButtonPressed()
+{
   return (4 < p.x && p.x < 11 && p.y >= 19);
+}
 bool resetButtonPressed()
+{
   return (p.x >= 11 && p.y >= 19);
+}
+
+void resetScreen()
+{
+  for(int i = 0; i < LED_WIDTH; i++)
+    for(int n = 0; n < LED_HEIGHT; n++)
+      pattern[i][n] = false;
+  tft.fillScreen(ILI9341_BLACK);
+}
