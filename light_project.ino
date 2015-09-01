@@ -21,6 +21,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 #define LED_HEIGHT 16
 
 bool pattern[20][16];
+static bool erasedPattern[20][16];
 bool bErasing = false;
 bool bBlankScreen = true;
 TS_Point p;
@@ -124,7 +125,18 @@ void check_sidebar()
     else
     {
       if (finishedButtonPressed())
-        Serial.println("finished button pressed");
+      { Serial.println();
+        for (int n = 0; n < LED_WIDTH; n++)
+        {
+          Serial.println();
+          for (int i = 0; i < LED_HEIGHT; i++)
+          {
+            Serial.print(pattern[i][n]);
+            update_ts();
+          }
+
+        }
+      }
       else if (toggleButtonPressed())
         bErasing = !bErasing;
       else if (resetButtonPressed())
@@ -176,9 +188,10 @@ void resetScreen()
 
 void checkPressure()
 {
-
-  while (p.z < 50)
+  if(p.z < 50)
   {
+    while(ts.touched())
+    {
     tft.setCursor(0, 0);
     tft.setTextColor(ILI9341_RED);
     tft.setTextSize(10);
@@ -186,21 +199,31 @@ void checkPressure()
     tft.setTextColor(ILI9341_ORANGE);
     tft.setTextSize(6);
     tft.print("Touch me gently");
+    update_ts();
+    }
+       rePrintScreen(pattern);
   }
-  // for(int i = 0; i < LED_WIDTH; i++)
-  // {
-  //  for(int n = 0; n < LED_HEIGHT; n++)
-  //   {
-  //    int color;
-  //    if(pattern[i][n])
-  //      color = ILI9341_WHITE;
-  //     else
-  //     color = ILI9341_BLACK;
-  //
-  //  tft.fillRect(BOXSIZE*p.y, BOXSIZE*p.x, BOXSIZE, BOXSIZE, ILI9341_WHITE);
-  //   }
-  // }
+}
 
+void rePrintScreen(bool printingScreen[20][16])
+{
+  for (int x = 0; x < LED_HEIGHT; x++)
+  {
+    for (int y = 0; y < LED_WIDTH; y++)
+    {
+      int color;
+      if (printingScreen[x][y])
+      {
+          Serial.println();
+        Serial.print(x);
+        Serial.print(y);
+        color = ILI9341_WHITE;
+    }
+      else
+        color = ILI9341_BLACK;
 
+       tft.fillRect(BOXSIZE * y, BOXSIZE * x, BOXSIZE, BOXSIZE, color);
+    }
+  }
 }
 
